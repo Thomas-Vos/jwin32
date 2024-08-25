@@ -178,6 +178,7 @@ modules.xml
 
 # Package Files #
 *.jar
+!gradle-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -210,3 +211,6 @@ buildNumber.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/eclipse,maven,java,intellij+all
 guidlog.txt
+
+.gradle
+build
