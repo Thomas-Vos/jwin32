@@ -21,7 +21,12 @@
  */
 package com.falsepattern.jwin32.memory;
 
-import jdk.incubator.foreign.*;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import java.nio.ByteOrder;
+
+import static win32.pure.Win32.*;
 
 /**
  * A memory allocator handles creation of fixed-size memory segments. De-allocation support is not compulsive,
@@ -118,7 +123,7 @@ public interface MemoryAllocator extends SegmentAllocator {
      * @return A memory segment with size 2 and alignment 2
      */
     default MemorySegment mallocShort() {
-        return mallocAligned(CLinker.C_SHORT.byteSize(), CLinker.C_SHORT.byteAlignment());
+        return mallocAligned(C_SHORT.byteSize(), C_SHORT.byteAlignment());
     }
 
     /**
@@ -134,7 +139,7 @@ public interface MemoryAllocator extends SegmentAllocator {
      * @return A memory segment with size 4 and alignment 4
      */
     default MemorySegment mallocInt() {
-        return mallocAligned(CLinker.C_INT.byteSize(), CLinker.C_INT.byteAlignment());
+        return mallocAligned(C_INT.byteSize(), C_INT.byteAlignment());
     }
 
     /**
@@ -150,7 +155,7 @@ public interface MemoryAllocator extends SegmentAllocator {
      * @return A memory segment with size 4/8 and alignment 4/8, depending on the operating system
      */
     default MemorySegment mallocLong() {
-        return mallocAligned(CLinker.C_LONG.byteSize(), CLinker.C_LONG.byteAlignment());
+        return mallocAligned(C_LONG.byteSize(), C_LONG.byteAlignment());
     }
 
     /**
@@ -166,7 +171,7 @@ public interface MemoryAllocator extends SegmentAllocator {
      * @return A memory segment with size 8 and alignment 8
      */
     default MemorySegment mallocLongLong() {
-        return mallocAligned(CLinker.C_LONG_LONG.byteSize(), CLinker.C_LONG_LONG.byteAlignment());
+        return mallocAligned(C_LONG_LONG.byteSize(), C_LONG_LONG.byteAlignment());
     }
 
     /**
@@ -182,7 +187,7 @@ public interface MemoryAllocator extends SegmentAllocator {
      * @return A memory segment with size 8 and alignment 8
      */
     default MemorySegment mallocPointer() {
-        return mallocAligned(CLinker.C_POINTER.byteSize(), CLinker.C_POINTER.byteAlignment());
+        return mallocAligned(C_POINTER.byteSize(), C_POINTER.byteAlignment());
     }
 
     /**
@@ -198,19 +203,10 @@ public interface MemoryAllocator extends SegmentAllocator {
      * @param pValue A pointer to some memory
      * @return A pointer to the pointer
      */
-    default MemorySegment referenceP(MemoryAddress pValue) {
+    default MemorySegment referenceP(MemorySegment pValue) {
         var ppValue = mallocPointer();
         MemoryUtil.SetPointer(ppValue, pValue);
         return ppValue;
-    }
-
-    /**
-     * Same as {@link #referenceP(MemoryAddress)}, but for {@link MemorySegment}s.
-     * @param pValue A pointer to some memory
-     * @return A pointer to the pointer
-     */
-    default MemorySegment referenceP(MemorySegment pValue) {
-        return referenceP(pValue.address());
     }
 
     /**
@@ -219,6 +215,6 @@ public interface MemoryAllocator extends SegmentAllocator {
      * @return The native copy of the string
      */
     default MemorySegment toCString(String str) {
-        return CLinker.toCString(str, this);
+        return allocateUtf8String(str);
     }
 }

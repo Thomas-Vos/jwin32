@@ -21,8 +21,9 @@
  */
 package com.falsepattern.jwin32.internal.conversion.common;
 
-import jdk.incubator.foreign.*;
 import win32.pure.Win32;
+
+import java.lang.foreign.*;
 
 public record CType(String name, String simpleName, boolean primitive) {
     public static final CType VOID = new CType(void.class);
@@ -35,9 +36,9 @@ public record CType(String name, String simpleName, boolean primitive) {
     public static final CType DOUBLE = new CType(double.class);
     public static final CType STRING = new CType(String.class);
     public static final CType MEMORY_SEGMENT = new CType(MemorySegment.class);
-    public static final CType MEMORY_ADDRESS = new CType(MemoryAddress.class);
+    public static final CType MEMORY_ADDRESS = new CType(MemorySegment.class);
     public static final CType SEGMENT_ALLOCATOR = new CType(SegmentAllocator.class);
-    public static final CType RESOURCE_SCOPE = new CType(ResourceScope.class);
+    public static final CType RESOURCE_SCOPE = new CType(Arena.class);
     public static final CType WIN32 = new CType(Win32.class);
     public CType(Class<?> clazz) {
         this(getBaseTypeOfNDimensionalArray(clazz).getName().replace('$', '.'), getSimpleString(clazz), getBaseTypeOfNDimensionalArray(clazz).isPrimitive());

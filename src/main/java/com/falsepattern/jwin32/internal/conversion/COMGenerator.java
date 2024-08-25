@@ -40,7 +40,7 @@ public class COMGenerator {
         OBJ.accessSpecifier.vis = AccessSpecifier.Visibility.PUBLIC;
         SCOPE.type = CType.RESOURCE_SCOPE;
         SCOPE.name = "scope";
-        SCOPE.initializer.append("ResourceScope.newImplicitScope()");
+        SCOPE.initializer.append("Arena.ofAuto()");
 
         OBJ.type = CType.MEMORY_ADDRESS;
         OBJ.name = "obj";
@@ -108,7 +108,7 @@ public class COMGenerator {
                 .append("this.obj = address;\n"
                 + "vtbl = ").append(vtblName).append(".ofAddress(").append(baseClass.getSimpleName()).append(".lpVtbl$get(segment), scope);\n");
         for (var method: ifMethods) {
-            constructor.code.append(method.getName()).append(" = ").append(vtblName).append(".").append(method.getName()).append("(vtbl);\n");
+            constructor.code.append(method.getName()).append(" = ").append(vtblName).append(".").append(method.getName()).append("(vtbl, scope);\n");
         }
         return constructor;
     }

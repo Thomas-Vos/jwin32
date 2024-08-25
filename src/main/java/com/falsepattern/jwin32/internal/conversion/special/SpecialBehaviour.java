@@ -23,7 +23,7 @@
 package com.falsepattern.jwin32.internal.conversion.special;
 
 import com.falsepattern.jwin32.internal.conversion.common.CClass;
-import jdk.incubator.foreign.GroupLayout;
+import java.lang.foreign.GroupLayout;
 
 public interface SpecialBehaviour {
     boolean isApplicableBase(GroupLayout layout, String pkg, Class<?> parent);

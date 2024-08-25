@@ -24,17 +24,12 @@ package com.falsepattern.jwin32.internal.conversion;
 import com.falsepattern.jwin32.internal.conversion.common.*;
 import com.falsepattern.jwin32.internal.conversion.special.SpecialBehaviour;
 import com.falsepattern.jwin32.internal.conversion.special.StructGUID;
-import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.GroupLayout;
-import jdk.incubator.foreign.MemoryLayout;
-import jdk.incubator.foreign.ValueLayout;
+import java.lang.foreign.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static jdk.incubator.foreign.CLinker.C_CHAR;
 
 public class Struct {
     private static final CField SEGMENT_FIELD = new CField();

@@ -23,14 +23,12 @@
 package com.falsepattern.jwin32.internal.conversion.special;
 
 import com.falsepattern.jwin32.internal.conversion.common.*;
-import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.GroupLayout;
-import jdk.incubator.foreign.MemoryLayout;
+import win32.pure.Win32;
+
+import java.lang.foreign.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static jdk.incubator.foreign.CLinker.C_CHAR;
 
 /**
  * Special conversion for the GUID structure.
@@ -45,10 +43,10 @@ public class StructGUID implements SpecialBehaviour {
     public boolean isApplicableBase(GroupLayout layout, String pkg, Class<?> parent) {
         if (parent.getName().contains("GUID")) { //Early bailout before checking member layouts
             var members = layout.memberLayouts();
-            return members.get(0).equals(CLinker.C_LONG.withName("Data1")) &&
-                    members.get(1).equals(CLinker.C_SHORT.withName("Data2")) &&
-                    members.get(2).equals(CLinker.C_SHORT.withName("Data3")) &&
-                    members.get(3).equals(MemoryLayout.sequenceLayout(8, C_CHAR).withName("Data4"));
+            return members.get(0).equals(Win32.C_LONG.withName("Data1")) &&
+                    members.get(1).equals(Win32.C_SHORT.withName("Data2")) &&
+                    members.get(2).equals(Win32.C_SHORT.withName("Data3")) &&
+                    members.get(3).equals(MemoryLayout.sequenceLayout(8, Win32.C_CHAR).withName("Data4"));
         }
         return false;
     }

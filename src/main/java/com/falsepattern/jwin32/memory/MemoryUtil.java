@@ -21,10 +21,8 @@
  */
 package com.falsepattern.jwin32.memory;
 
-import jdk.incubator.foreign.*;
+import java.lang.foreign.*;
 
-import java.lang.invoke.VarHandle;
-import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,11 +31,7 @@ import java.util.Map;
  * Make sure to {@link #Free(MemorySegment)} every allocated block to avoid memory leaks, as they are not automatically released!
  */
 public class MemoryUtil implements MemoryAllocator {
-    static final VarHandle VH_BYTE = MemoryHandles.varHandle(byte.class, ByteOrder.nativeOrder());
-    static final VarHandle VH_SHORT = MemoryHandles.varHandle(short.class, ByteOrder.nativeOrder());
-    static final VarHandle VH_INT = MemoryHandles.varHandle(int.class, ByteOrder.nativeOrder());
-    static final VarHandle VH_LONG = MemoryHandles.varHandle(long.class, ByteOrder.nativeOrder());
-    private final Map<MemorySegment, ResourceScope> scopes = new HashMap<>();
+    private final Map<MemorySegment, Arena> scopes = new HashMap<>();
     public static final MemoryUtil instance = new MemoryUtil();
     private MemoryUtil(){}
 
@@ -47,7 +41,7 @@ public class MemoryUtil implements MemoryAllocator {
      * @return The value at the start of the segment
      */
     public static byte GetByte(MemorySegment segment) {
-        return (byte) VH_BYTE.get(segment, 0);
+        return segment.get(ValueLayout.JAVA_BYTE, 0);
     }
 
     /**
@@ -56,7 +50,7 @@ public class MemoryUtil implements MemoryAllocator {
      * @param value The value to write into the segment
      */
     public static void SetByte(MemorySegment segment, byte value) {
-        VH_BYTE.set(segment, 0, value);
+        segment.set(ValueLayout.JAVA_BYTE, 0, value);
     }
 
     /**
@@ -65,7 +59,7 @@ public class MemoryUtil implements MemoryAllocator {
      * @return The value at the start of the segment
      */
     public static short GetShort(MemorySegment segment) {
-        return (short) VH_SHORT.get(segment, 0);
+        return segment.get(ValueLayout.JAVA_SHORT, 0);
     }
 
     /**
@@ -74,7 +68,7 @@ public class MemoryUtil implements MemoryAllocator {
      * @param value The value to write into the segment
      */
     public static void SetShort(MemorySegment segment, short value) {
-        VH_SHORT.set(segment, 0, value);
+        segment.set(ValueLayout.JAVA_SHORT, 0, value);
     }
 
     /**
@@ -83,7 +77,7 @@ public class MemoryUtil implements MemoryAllocator {
      * @return The value at the start of the segment
      */
     public static int GetInt(MemorySegment segment) {
-        return (int) VH_INT.get(segment, 0);
+        return segment.get(ValueLayout.JAVA_INT, 0);
     }
 
     /**
@@ -92,7 +86,7 @@ public class MemoryUtil implements MemoryAllocator {
      * @param value The value to write into the segment
      */
     public static void SetInt(MemorySegment segment, int value) {
-        VH_INT.set(segment, 0, value);
+        segment.set(ValueLayout.JAVA_INT, 0, value);
     }
 
     /**
@@ -101,7 +95,7 @@ public class MemoryUtil implements MemoryAllocator {
      * @return The value at the start of the segment
      */
     public static long GetLong(MemorySegment segment) {
-        return (long) VH_LONG.get(segment, 0);
+        return segment.get(ValueLayout.JAVA_LONG, 0);
     }
 
     /**
@@ -110,7 +104,7 @@ public class MemoryUtil implements MemoryAllocator {
      * @param value The value to write into the segment
      */
     public static void SetLong(MemorySegment segment, long value) {
-        VH_LONG.set(segment, 0, value);
+        segment.set(ValueLayout.JAVA_LONG, 0, value);
     }
 
     /**
@@ -118,8 +112,8 @@ public class MemoryUtil implements MemoryAllocator {
      * @param segment The segment to read from
      * @return The value at the start of the segment
      */
-    public static MemoryAddress GetPointer(MemorySegment segment) {
-        return MemoryAddress.ofLong((Long) VH_LONG.get(segment, 0));
+    public static MemorySegment GetPointer(MemorySegment segment) {
+        return MemorySegment.ofAddress(segment.get(ValueLayout.JAVA_LONG, 0));
     }
 
     /**
@@ -127,8 +121,8 @@ public class MemoryUtil implements MemoryAllocator {
      * @param segment The segment to write to
      * @param value The value to write into the segment
      */
-    public static void SetPointer(MemorySegment segment, MemoryAddress value) {
-        VH_LONG.set(segment, 0, value.toRawLongValue());
+    public static void SetPointer(MemorySegment segment, MemorySegment value) {
+        segment.set(ValueLayout.JAVA_LONG, 0, value.address());
     }
 
     /**
@@ -212,10 +206,6 @@ public class MemoryUtil implements MemoryAllocator {
         return instance.callocPointer();
     }
 
-    public static MemorySegment ReferenceP(MemoryAddress pValue) {
-        return instance.referenceP(pValue);
-    }
-
     public static MemorySegment ReferenceP(MemorySegment pValue) {
         return instance.referenceP(pValue);
     }
@@ -224,86 +214,14 @@ public class MemoryUtil implements MemoryAllocator {
         return instance.toCString(str);
     }
 
-    public static MemorySegment Allocate(ValueLayout layout, byte value) {
-        return instance.allocate(layout, value);
-    }
-
-    public static MemorySegment Allocate(ValueLayout layout, char value) {
-        return instance.allocate(layout, value);
-    }
-
-    public static MemorySegment Allocate(ValueLayout layout, short value) {
-        return instance.allocate(layout, value);
-    }
-
-    public static MemorySegment Allocate(ValueLayout layout, int value) {
-        return instance.allocate(layout, value);
-    }
-
-    public static MemorySegment Allocate(ValueLayout layout, float value) {
-        return instance.allocate(layout, value);
-    }
-
-    public static MemorySegment Allocate(ValueLayout layout, long value) {
-        return instance.allocate(layout, value);
-    }
-
-    public static MemorySegment Allocate(ValueLayout layout, double value) {
-        return instance.allocate(layout, value);
-    }
-
-    public static MemorySegment Allocate(ValueLayout layout, Addressable value) {
-        return instance.allocate(layout, value);
-    }
-
-    public static MemorySegment AllocateArray(ValueLayout elementLayout, byte[] array) {
-        return instance.allocateArray(elementLayout, array);
-    }
-
-    public static MemorySegment AllocateArray(ValueLayout elementLayout, short[] array) {
-        return instance.allocateArray(elementLayout, array);
-    }
-
-    public static MemorySegment AllocateArray(ValueLayout elementLayout, char[] array) {
-        return instance.allocateArray(elementLayout, array);
-    }
-
-    public static MemorySegment AllocateArray(ValueLayout elementLayout, int[] array) {
-        return instance.allocateArray(elementLayout, array);
-    }
-
-    public static MemorySegment AllocateArray(ValueLayout elementLayout, float[] array) {
-        return instance.allocateArray(elementLayout, array);
-    }
-
-    public static MemorySegment AllocateArray(ValueLayout elementLayout, long[] array) {
-        return instance.allocateArray(elementLayout, array);
-    }
-
-    public static MemorySegment AllocateArray(ValueLayout elementLayout, double[] array) {
-        return instance.allocateArray(elementLayout, array);
-    }
-
-    public static MemorySegment AllocateArray(ValueLayout elementLayout, Addressable[] array) {
-        return instance.allocateArray(elementLayout, array);
-    }
-
-    public static MemorySegment Allocate(MemoryLayout layout) {
-        return instance.allocate(layout);
-    }
-
-    public static MemorySegment AllocateArray(MemoryLayout elementLayout, long count) {
-        return instance.allocateArray(elementLayout, count);
-    }
-
     public static MemorySegment Allocate(long bytesSize) {
         return instance.allocate(bytesSize);
     }
 
     @Override
     public MemorySegment mallocAligned(long size, long alignment) {
-        var scope = ResourceScope.newConfinedScope();
-        var segment = MemorySegment.allocateNative(size, alignment, scope);
+        var scope = Arena.ofConfined();
+        var segment = scope.allocate(size, alignment);
         scopes.put(segment, scope);
         return segment;
     }

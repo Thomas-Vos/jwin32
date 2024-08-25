@@ -31,7 +31,7 @@ SOFTWARE.
     <version>0.5.1</version>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <project.encoding>US-ASCII</project.encoding>
     </properties>
     <build>
@@ -45,8 +45,7 @@ SOFTWARE.
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <compilerArgs>
-                        <arg>--add-modules</arg>
-                        <arg>jdk.incubator.foreign</arg>
+                        <arg>--enable-preview</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -69,7 +68,7 @@ SOFTWARE.
                         <classpath/>
                         <argument>-Dforeign.restricted=permit</argument>
                         <argument>--enable-native-access=ALL-UNNAMED</argument>
-                        <argument>--add-modules</argument><argument>jdk.incubator.foreign</argument>
+                        <argument>--enable-preview</argument>
                         <mainClass>com.falsepattern.jwin32.internal.conversion.Translator</mainClass>
                     </arguments>
                 </configuration>
@@ -120,8 +119,7 @@ SOFTWARE.
                         <additionalJOption>-J-Xmx8G</additionalJOption>
                         <additionalJOption>-J-Dforeign.restricted=permit</additionalJOption>
                         <additionalJOption>-J--enable-native-access=ALL-UNNAMED</additionalJOption>
-                        <additionalJOption>-J--add-modules</additionalJOption><additionalJOption>-Jjdk.incubator.foreign</additionalJOption>
-                        <additionalJOption>--add-modules</additionalJOption><additionalJOption>jdk.incubator.foreign</additionalJOption>
+                        <additionalJOption>-J--enable-preview</additionalJOption>
                     </additionalJOptions>
                     <excludePackageNames>win32.pure:win32.mapped:win32.mapped.*</excludePackageNames>
                 </configuration>

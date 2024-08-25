@@ -25,9 +25,7 @@ import com.falsepattern.jwin32.internal.conversion.common.AccessSpecifier;
 import com.falsepattern.jwin32.internal.conversion.common.CClass;
 import com.falsepattern.jwin32.internal.conversion.common.CField;
 import com.falsepattern.jwin32.internal.conversion.common.CType;
-import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.MemoryAddress;
-import jdk.incubator.foreign.MemorySegment;
+import java.lang.foreign.*;
 import win32.pure.Win32;
 
 import java.io.File;
@@ -47,7 +45,7 @@ public class ConstMapper {
     private static final Pattern DEFINED_FLOAT = Pattern.compile(" {4}public static float (\\w+)\\(\\) \\{\\n {8}return (-?\\d+\\.?\\d*E?\\d*f);\\n {4}}\n");
     private static final Pattern DEFINED_DOUBLE = Pattern.compile(" {4}public static double (\\w+)\\(\\) \\{\\n {8}return (-?\\d+\\.?\\d*E?\\d*d);\\n {4}}\n");
     private static final Pattern DEFINED_STRING = Pattern.compile(" {4}public static MemorySegment (\\w+)\\(\\) \\{\\n {8}return constants\\$\\d+\\..*?;\\n {4}}\n");
-    private static final Pattern DEFINED_POINTER = Pattern.compile(" {4}public static MemoryAddress (\\w+)\\(\\) \\{\\n {8}return constants\\$\\d+\\..*?;\\n {4}}\n");
+//    private static final Pattern DEFINED_POINTER = Pattern.compile(" {4}public static MemoryAddress (\\w+)\\(\\) \\{\\n {8}return constants\\$\\d+\\..*?;\\n {4}}\n");
 
     private static final Map<CType, Pattern> patterns = new HashMap<>();
     static {
@@ -57,7 +55,7 @@ public class ConstMapper {
         patterns.put(CType.LONG, DEFINED_LONG);
         patterns.put(CType.FLOAT, DEFINED_FLOAT);
         patterns.put(CType.DOUBLE, DEFINED_DOUBLE);
-        patterns.put(CType.MEMORY_ADDRESS, DEFINED_POINTER);
+//        patterns.put(CType.MEMORY_ADDRESS, DEFINED_POINTER);
         patterns.put(CType.MEMORY_SEGMENT, DEFINED_STRING);
     }
     public static CClass[] extractAllConstants(String pkg, List<File> files) {
@@ -97,10 +95,9 @@ public class ConstMapper {
                                     method.setAccessible(true);
                                     var value = method.invoke(null);
                                     if (type.equals(CType.MEMORY_ADDRESS)) {
-                                        var offset = ((MemoryAddress)value).segmentOffset(MemorySegment.globalNativeSegment());
-                                        field.initializer.append(offset).append('L');
+                                        field.initializer.append(((MemorySegment)value).address()).append('L');
                                     } else {
-                                        var str = CLinker.toJavaString((MemorySegment) value);
+                                        var str = ((MemorySegment) value).getUtf8String(0);
                                         field.initializer.append('"').append(escape(str)).append('"');
                                     }
                                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
