@@ -77,7 +77,7 @@
 //
 //Uncomment if you want to use the DXGI library.
 
-//#define JWIN32_DXGI
+#define JWIN32_DXGI
 
 
 //Direct3D
@@ -88,6 +88,6 @@
 
 //#define JWIN32_D3D_9
 //#define JWIN32_D3D_10
-//#define JWIN32_D3D_11
+#define JWIN32_D3D_11
 //#define JWIN32_D3D_12
 //#define JWIN32_D3D11ON12
