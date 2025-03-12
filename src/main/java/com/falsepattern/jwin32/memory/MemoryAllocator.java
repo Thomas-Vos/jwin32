@@ -215,6 +215,6 @@ public interface MemoryAllocator extends SegmentAllocator {
      * @return The native copy of the string
      */
     default MemorySegment toCString(String str) {
-        return allocateUtf8String(str);
+        return allocateFrom(str);
     }
 }

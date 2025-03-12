@@ -75,7 +75,7 @@ public class Translator {
                     Struct struct;
                     Method method;
                     try {
-                        method = baseClass.getDeclaredMethod("$LAYOUT");
+                        method = baseClass.getDeclaredMethod("layout");
                     } catch (NoSuchMethodException e) {
                         continue;
                     }

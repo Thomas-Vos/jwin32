@@ -63,8 +63,7 @@ public class GUIDHunter implements Consumer<File> {
 """); //Don't care about the rest
 
     private final Pattern jextractGUIDRegex = Pattern.compile("""
- = RuntimeHelper\\.lookupGlobalVariable\\("(\\w+)", constants\\$\\d+\\.const\\$\\d+\\);
-""");
+ = Win32\\.findOrThrow\\("(\\w+)"\\)""");
 
     public GUIDHunter(File rootDirectory) {
         System.out.println("Initializing GUIDHunter...");
@@ -103,7 +102,7 @@ public class GUIDHunter implements Consumer<File> {
                                 .replaceAll((match) -> {
                                     var guidName = match.group(1);
                                     if (guidMap.containsKey(guidName)) {
-                                        return (" = Arena.global().allocateArray(ValueLayout.JAVA_BYTE, " + guidMap.get(guidName) + ");\n").replace("$", "\\$");
+                                        return (" = Arena.global().allocateFrom(ValueLayout.JAVA_BYTE, " + guidMap.get(guidName) + ")").replace("$", "\\$");
                                     } else if (guidName.contains("IID")) {
                                         synchronized (log) {
                                             log.append("GUID mapping not found: ").append(guidName).append('\n');

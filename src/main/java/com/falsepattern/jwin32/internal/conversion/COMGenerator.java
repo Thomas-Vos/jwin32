@@ -23,6 +23,7 @@ package com.falsepattern.jwin32.internal.conversion;
 
 import com.falsepattern.jwin32.internal.conversion.common.*;
 
+import java.lang.foreign.MemorySegment;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -65,7 +66,7 @@ public class COMGenerator {
         if (!com.name.equals("ID3DInclude_J"))
             com.addMethod(getREFIIDMethod(baseClass));
         for (Method method : ifMethods) {
-            var wrapper = toWrapper(method);
+            var wrapper = toWrapper(baseClass, vtbl, method);
             if (wrapper == null) {
                 System.err.println("Failed to generate wrapper method for " + baseClass.getSimpleName() + "." + method.getName() + "!");
                 continue;
@@ -86,7 +87,7 @@ public class COMGenerator {
         if (baseClass.getSimpleName().equals("XMLDOMDocumentEvents")) {
             method.code.append("D");
         }
-        method.code.append("IID_").append(baseClass.getSimpleName()).append("$SEGMENT();");
+        method.code.append("IID_").append(baseClass.getSimpleName()).append("();");
         return method;
     }
 
@@ -104,11 +105,11 @@ public class COMGenerator {
         constructor.accessSpecifier.vis = AccessSpecifier.Visibility.PUBLIC;
         constructor.paramList.add(MEMORY_ADDRESS_PARAM);
         constructor.code
-                .append("var segment = ").append(baseClass.getSimpleName()).append(".ofAddress(address, scope);")
+                .append("var segment = ").append(baseClass.getSimpleName()).append(".reinterpret(address, scope, null);")
                 .append("this.obj = address;\n"
-                + "vtbl = ").append(vtblName).append(".ofAddress(").append(baseClass.getSimpleName()).append(".lpVtbl$get(segment), scope);\n");
+                + "vtbl = ").append(vtblName).append(".reinterpret(").append(baseClass.getSimpleName()).append(".lpVtbl(segment), scope, null);\n");
         for (var method: ifMethods) {
-            constructor.code.append(method.getName()).append(" = ").append(vtblName).append(".").append(method.getName()).append("(vtbl, scope);\n");
+            constructor.code.append(method.getName()).append(" = ").append(vtblName).append(".").append(method.getName()).append("(vtbl);\n");
         }
         return constructor;
     }
@@ -116,13 +117,20 @@ public class COMGenerator {
     private static Method[] getInterfaceMethods(Class<?> vtbl) {
         var enclosedClasses = Arrays.asList(vtbl.getClasses());
         return Arrays.stream(vtbl.getMethods())
-                .filter((method) -> enclosedClasses.stream().anyMatch((clazz) -> clazz.getSimpleName().equals(method.getName()) && clazz.equals(method.getReturnType())))
+                .filter((method) -> enclosedClasses.stream().anyMatch((clazz) -> clazz.getSimpleName().equals(method.getName()) && MemorySegment.class.equals(method.getReturnType())))
                 .toArray(Method[]::new);
     }
 
-    private static CMethod toWrapper(Method getter) {
-        var methodInterface = getter.getReturnType();
-        var optMethod = Arrays.stream(methodInterface.getMethods()).filter((method -> method.getName().equals("apply"))).findFirst();
+    private static CMethod toWrapper(Class<?> baseClass, Class<?> vtbl, Method getter) {
+        Class<?> methodInterface;
+        Class<?> functionInterface;
+        try {
+            methodInterface = Class.forName(vtbl.getName() + "$" + getter.getName(), false, COMGenerator.class.getClassLoader());
+            functionInterface = Class.forName(methodInterface.getName() + "$Function", false, COMGenerator.class.getClassLoader());
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+        var optMethod = Arrays.stream(functionInterface.getMethods()).filter((method -> method.getName().equals("apply"))).findFirst();
         if (optMethod.isEmpty()) return null;
         var interfaceMethod = optMethod.get();
         var wrapper = new CMethod();
@@ -130,6 +138,7 @@ public class COMGenerator {
         wrapper.name = methodInterface.getSimpleName();
         wrapper.returnType = new CType(interfaceMethod.getReturnType());
         var callParamList = new CParamList();
+        callParamList.add(new CParameter(CType.MEMORY_ADDRESS, methodInterface.getSimpleName()));
         callParamList.add(new CParameter(CType.MEMORY_ADDRESS, "obj"));
         var params = Arrays.asList(interfaceMethod.getParameters());
         params = params.subList(1, params.size());
@@ -141,7 +150,8 @@ public class COMGenerator {
         if (!interfaceMethod.getReturnType().equals(void.class)) {
             wrapper.code.append("return ");
         }
-        wrapper.code.append(wrapper.name).append(".apply(").append(callParamList.asFunctionCallParams()).append(");");
+        wrapper.code.append(vtbl.getSimpleName()).append(".").append(methodInterface.getSimpleName())
+                .append(".invoke(").append(callParamList.asFunctionCallParams()).append(");");
         return wrapper;
     }
 }

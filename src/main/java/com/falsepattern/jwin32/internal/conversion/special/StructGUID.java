@@ -68,7 +68,7 @@ public class StructGUID implements SpecialBehaviour {
         ctor.accessSpecifier.vis = AccessSpecifier.Visibility.PUBLIC;
         ctor.paramList.add(new CParameter(CType.MEMORY_SEGMENT, "segment"));
         addArgs(ctor);
-        ctor.code.append("this(segment);\nData1(data1);\nData2(data2);\nData3(data3);\n").append(parent.getSimpleName()).append(".Data4$slice(segment).copyFrom(MemorySegment.ofArray(data4));\n");
+        ctor.code.append("this(segment);\nData1(data1);\nData2(data2);\nData3(data3);\n").append(parent.getSimpleName()).append(".Data4(segment).copyFrom(MemorySegment.ofArray(data4));\n");
         implementation.addConstructor(ctor);
 
         //Allocator version

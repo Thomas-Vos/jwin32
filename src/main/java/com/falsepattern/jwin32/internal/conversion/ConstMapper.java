@@ -38,12 +38,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class ConstMapper {
-    private static final Pattern DEFINED_BYTE = Pattern.compile(" {4}public static byte (\\w+)\\(\\) \\{\\n {8}return (\\(byte\\)-?\\d+L);\\n {4}}\n");
-    private static final Pattern DEFINED_SHORT = Pattern.compile(" {4}public static short (\\w+)\\(\\) \\{\\n {8}return (\\(short\\)-?\\d+L);\\n {4}}\n");
-    private static final Pattern DEFINED_INT = Pattern.compile(" {4}public static int (\\w+)\\(\\) \\{\\n {8}return (\\(int\\)-?\\d+L);\\n {4}}\n");
-    private static final Pattern DEFINED_LONG = Pattern.compile(" {4}public static long (\\w+)\\(\\) \\{\\n {8}return (-?\\d+L);\\n {4}}\n");
-    private static final Pattern DEFINED_FLOAT = Pattern.compile(" {4}public static float (\\w+)\\(\\) \\{\\n {8}return (-?\\d+\\.?\\d*E?\\d*f);\\n {4}}\n");
-    private static final Pattern DEFINED_DOUBLE = Pattern.compile(" {4}public static double (\\w+)\\(\\) \\{\\n {8}return (-?\\d+\\.?\\d*E?\\d*d);\\n {4}}\n");
+    private static final Pattern DEFINED_BYTE = Pattern.compile(" {4}public static byte (\\w+)\\(\\) \\{\\n {8}return (\\w+);\\n {4}}\n");
+    private static final Pattern DEFINED_SHORT = Pattern.compile(" {4}public static short (\\w+)\\(\\) \\{\\n {8}return (\\w+);\\n {4}}\n");
+    private static final Pattern DEFINED_INT = Pattern.compile(" {4}public static int (\\w+)\\(\\) \\{\\n {8}return (\\w+);\\n {4}}\n");
+    private static final Pattern DEFINED_LONG = Pattern.compile(" {4}public static long (\\w+)\\(\\) \\{\\n {8}return (\\w+);\\n {4}}\n");
+    private static final Pattern DEFINED_FLOAT = Pattern.compile(" {4}public static float (\\w+)\\(\\) \\{\\n {8}return (\\w+);\\n {4}}\n");
+    private static final Pattern DEFINED_DOUBLE = Pattern.compile(" {4}public static double (\\w+)\\(\\) \\{\\n {8}return (\\w+);\\n {4}}\n");
     private static final Pattern DEFINED_STRING = Pattern.compile(" {4}public static MemorySegment (\\w+)\\(\\) \\{\\n {8}return constants\\$\\d+\\..*?;\\n {4}}\n");
 //    private static final Pattern DEFINED_POINTER = Pattern.compile(" {4}public static MemoryAddress (\\w+)\\(\\) \\{\\n {8}return constants\\$\\d+\\..*?;\\n {4}}\n");
 
@@ -81,8 +81,6 @@ public class ConstMapper {
                     var fields = new LinkedList<CField>();
                     patterns.forEach((type, pattern) -> {
                         var matcher = pattern.matcher(contents[0]);
-                        var fileRemnant = new StringBuilder();
-                        int lastEnd = 0;
                         while (matcher.find()) {
                             var field = new CField();
                             field.accessSpecifier.vis = AccessSpecifier.Visibility.PUBLIC;
@@ -97,7 +95,7 @@ public class ConstMapper {
                                     if (type.equals(CType.MEMORY_ADDRESS)) {
                                         field.initializer.append(((MemorySegment)value).address()).append('L');
                                     } else {
-                                        var str = ((MemorySegment) value).getUtf8String(0);
+                                        var str = ((MemorySegment) value).getString(0);
                                         field.initializer.append('"').append(escape(str)).append('"');
                                     }
                                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -105,15 +103,11 @@ public class ConstMapper {
                                 }
                             } else {
                                 field.type = type;
-                                field.initializer.append(matcher.group(2));
+                                var fileName = file.getName();
+                                var className = fileName.substring(0, fileName.length() - 5);
+                                field.initializer.append("win32.pure.").append(className).append(".").append(matcher.group(2)).append("()");
                             }
                                 fields.add(field);
-                                fileRemnant.append(contents[0], lastEnd, matcher.start());
-                                lastEnd = matcher.end();
-                        }
-                        if (lastEnd != 0) {
-                            fileRemnant.append(contents[0], lastEnd, contents[0].length());
-                            contents[0] = fileRemnant.toString();
                         }
                     });
                     try {

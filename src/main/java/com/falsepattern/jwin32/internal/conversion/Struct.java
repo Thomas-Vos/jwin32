@@ -132,15 +132,15 @@ public class Struct {
                     var setter = new CMethod();
                     getter.accessSpecifier.vis = setter.accessSpecifier.vis = AccessSpecifier.Visibility.PUBLIC;
                     getter.name = setter.name = name;
-                    var oGetter = Arrays.stream(parent.getMethods()).filter((method) -> method.getParameterCount() == 1 && method.getName().equals(name + "$get")).findFirst();
+                    var oGetter = Arrays.stream(parent.getMethods()).filter((method) -> method.getParameterCount() == 1 && method.getName().equals(name)).findFirst();
                     if (oGetter.isEmpty()) {
                         System.err.println("Could not generate getter/setter for struct field " + name);
                         return Stream.empty();
                     }
                     var type = new CType(oGetter.get().getReturnType());
                     setter.paramList.add(new CParameter(getter.returnType = type, "value"));
-                    getter.code.append("return ").append(parent.getSimpleName()).append('.').append(name).append("$get(segment);");
-                    setter.code.append(parent.getSimpleName()).append('.').append(name).append("$set(segment, value);");
+                    getter.code.append("return ").append(parent.getSimpleName()).append('.').append(name).append("(segment);");
+                    setter.code.append(parent.getSimpleName()).append('.').append(name).append("(segment, value);");
                     return Stream.of(getter, setter);
                 })
                 .forEach(implementation::addMethod);
@@ -181,7 +181,7 @@ public class Struct {
         var cType = struct.implementation.asCType();
 
         var field = new CField();
-        implementation.constructors.get(0).code.append("\n").append(name).append(" = new ").append(cType.simpleName()).append("(").append(parent.getSimpleName()).append(".").append(name).append("$slice(segment));");
+        implementation.constructors.get(0).code.append("\n").append(name).append(" = new ").append(cType.simpleName()).append("(").append(parent.getSimpleName()).append(".").append(name).append("(segment));");
         field.accessSpecifier.vis = AccessSpecifier.Visibility.PUBLIC;
         field.accessSpecifier.fin = true;
         field.name = name;
