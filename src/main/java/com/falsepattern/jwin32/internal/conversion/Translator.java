@@ -129,6 +129,14 @@ public class Translator {
             }
         }
 
+        // GraalVM
+        var graalGenerator = new GraalGenerator();
+        for (var fName: fNames) {
+            graalGenerator.add(fName);
+        }
+        var graalClass = graalGenerator.generate();
+        Files.writeString(Path.of("./src/main/java/win32/mapped/graalvm/" + graalClass.name + ".java"), graalClass.toString());
+
         System.out.println("Generating substruct getters");
         var structList = structs.values().stream().toList();
         structList.stream().parallel().filter(Struct::isBaseImplementation).forEach((struct) -> {
@@ -174,6 +182,7 @@ public class Translator {
                     exports com.falsepattern.jwin32.memory;
                 """ + (comObjects.size() > 0 ? "    exports win32.mapped.com;" : "") + """
                     exports win32.mapped.constants;
+                    exports win32.mapped.graalvm;
                     exports win32.mapped.struct;
                     exports win32.pure;
                 }""");

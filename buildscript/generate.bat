@@ -28,6 +28,7 @@ mkdir .\src\main\java\win32\mapped
 mkdir .\src\main\java\win32\mapped\com
 mkdir .\src\main\java\win32\mapped\struct
 mkdir .\src\main\java\win32\mapped\constants
+mkdir .\src\main\java\win32\mapped\graalvm
 echo Cleanup finished!
 echo Generating panama mappings...
 REM Edit this line if you want to make custom mappings:
