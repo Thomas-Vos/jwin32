@@ -105,6 +105,10 @@ public class ConstMapper {
                                 field.type = type;
                                 var fileName = file.getName();
                                 var className = fileName.substring(0, fileName.length() - 5);
+                                var underscoreIndex = className.lastIndexOf('_');
+                                if (underscoreIndex != -1) {
+                                    className = className.substring(0, underscoreIndex);
+                                }
                                 field.initializer.append("win32.pure.").append(className).append(".").append(matcher.group(2)).append("()");
                             }
                                 fields.add(field);

@@ -11,8 +11,11 @@ plugins {
 group = 'com.falsepattern'
 version = '0.6.0'
 description = 'jwin32'
-java.sourceCompatibility = JavaVersion.VERSION_23
-mainClassName = 'com.falsepattern.jwin32.internal.conversion.Translator'
+java.sourceCompatibility = JavaVersion.VERSION_25
+
+application {
+    mainClass = 'com.falsepattern.jwin32.internal.conversion.Translator'
+}
 
 java {
     withSourcesJar()

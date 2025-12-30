@@ -32,6 +32,6 @@ mkdir .\src\main\java\win32\mapped\graalvm
 echo Cleanup finished!
 echo Generating panama mappings...
 REM Edit this line if you want to make custom mappings:
-%HUE_ESSENTIALS_DESKTOP_PANAMA_JDK_22%\bin\jextract --header-class-name Win32 --output .\src\main\java -t win32.pure .\c\native.h
+%JEXTRACT_JDK%\bin\jextract --header-class-name Win32 --output .\src\main\java -t win32.pure .\c\native.h
 
 echo Generation finished!
