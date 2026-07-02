@@ -63,7 +63,7 @@ public class GUIDHunter implements Consumer<File> {
 """); //Don't care about the rest
 
     private final Pattern jextractGUIDRegex = Pattern.compile("""
- = Win32\\.findOrThrow\\("(\\w+)"\\)""");
+ = SYMBOL_LOOKUP\\.findOrThrow\\("(\\w+)"\\)""");
 
     public GUIDHunter(File rootDirectory) {
         System.out.println("Initializing GUIDHunter...");
